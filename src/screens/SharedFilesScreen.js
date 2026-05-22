@@ -1,63 +1,91 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import API from "../api";
-import SubjectCard from "../components/SubjectCard";
-import "./SubjectFiles.css";
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
 
-function SharedSubjectFiles() {
+import { useRoute } from '@react-navigation/native';
+import API from '../api';
+import SubjectCard from '../components/SubjectCard';
 
-    const { groupCode, semester, subject } = useParams();
+export default function SharedSubjectFilesScreen() {
 
-    const [files, setFiles] = useState([]);
+  const route = useRoute();
 
-    useEffect(() => {
+  const { groupCode, semester, subject } = route.params;
 
-        loadFiles();
+  const [files, setFiles] = useState([]);
 
-    }, []);
+  useEffect(() => {
+    loadFiles();
+  }, []);
 
-    const loadFiles = async () => {
+  const loadFiles = async () => {
+    try {
+      const res = await API.get(`/files/shared/${groupCode}`);
 
-        try {
+      setFiles(
+        res.data.grouped[semester][subject]
+      );
 
-            const res = await API.get(`/files/shared/${groupCode}`);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-            setFiles(
-                res.data.grouped[semester][subject]
-            );
+  return (
 
-        } catch (err) {
+    <ScrollView style={styles.container}>
 
-            console.log(err);
-        }
-    };
+      <View style={styles.inner}>
 
-    return (
+        <View style={styles.header}>
 
-        <div className="subjectFilesMain">
+          <Text style={styles.title}>
+            {subject}
+          </Text>
 
-            <div className="subjectFilesContainer">
+          <Text style={styles.semester}>
+            {semester}
+          </Text>
 
-                <div className="subjectFilesHeader">
+        </View>
 
-                    <h1 className="subjectFilesTitle">
-                        {subject}
-                    </h1>
+        <SubjectCard
+          files={files}
+        />
 
-                    <p className="subjectFilesSemester">
-                        {semester}
-                    </p>
+      </View>
 
-                </div>
-
-                <SubjectCard
-                    files={files}
-                />
-
-            </div>
-
-        </div>
-    );
+    </ScrollView>
+  );
 }
 
-export default SharedSubjectFiles;
+const styles = StyleSheet.create({
+
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+
+  inner: {
+    padding: 20,
+  },
+
+  header: {
+    marginBottom: 20,
+  },
+
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+
+  semester: {
+    fontSize: 16,
+    color: 'gray',
+  },
+
+});

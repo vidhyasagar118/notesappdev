@@ -8,9 +8,7 @@ import {
   Alert,
 } from 'react-native';
 
-import axios from 'axios';
-import API_URL from '../config/api';
-
+import API from '../config/api';
 export default function RegisterScreen({ navigation }) {
 
   const [name, setName] = useState('');
@@ -20,11 +18,10 @@ export default function RegisterScreen({ navigation }) {
 
     try {
 
-      await axios.post(`${API_URL}/auth/register`, {
-        name,
-        password,
-      });
-
+     await API.post('/auth/register', {
+  name,
+  password,
+});
       Alert.alert('Success', 'Account Created');
 
       navigation.navigate('Login');

@@ -1,85 +1,130 @@
-import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import API from "../api";
-import "./Subjects.css";
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 
-function SharedSubjectsPage() {
+import { useNavigation, useRoute } from '@react-navigation/native';
+import API from '../api';
 
-    const { groupCode, semester } = useParams();
+export default function SharedSubjectsScreen() {
 
-    const [subjects, setSubjects] = useState({});
+  const navigation = useNavigation();
+  const route = useRoute();
 
-    useEffect(() => {
+  const { groupCode, semester } = route.params;
 
-        loadSubjects();
+  const [subjects, setSubjects] = useState({});
 
-    }, []);
+  useEffect(() => {
+    loadSubjects();
+  }, []);
 
-    const loadSubjects = async () => {
+  const loadSubjects = async () => {
+    try {
+      const res = await API.get(`/files/shared/${groupCode}`);
+      setSubjects(res.data.grouped[semester]);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-        try {
+  return (
 
-            const res = await API.get(`/files/shared/${groupCode}`);
+    <ScrollView style={styles.container}>
 
-            setSubjects(res.data.grouped[semester]);
+      <View style={styles.inner}>
 
-        } catch (err) {
+        <Text style={styles.semesterTitle}>
+          {semester}
+        </Text>
 
-            console.log(err);
-        }
-    };
+        <View style={styles.grid}>
 
-    return (
+          {
+            subjects &&
+            Object.keys(subjects).map((subject, index) => (
 
-        <div className="subjectsPageMain">
+              <TouchableOpacity
+                key={subject}
+                style={styles.card}
+                onPress={() =>
+                  navigation.navigate('SharedSubjectFiles', {
+                    groupCode,
+                    semester,
+                    subject
+                  })
+                }
+              >
 
-            <div className="subjectsContainer">
+                <View style={styles.cardTop}>
 
-                <h1 className="subjectsSemesterTitle">
-                    {semester}
-                </h1>
+                  <Text style={styles.subjectName}>
+                    {subject}
+                  </Text>
 
-                <div className="subjectsGrid">
+                  <Text style={styles.fileCount}>
+                    {subjects[subject].length} Files
+                  </Text>
 
-                    {
-                        subjects &&
-                        Object.keys(subjects).map((subject, index) => (
+                </View>
 
-                            <Link
-                                key={subject}
-                                to={`/sharedfiles/${groupCode}/${semester}/${subject}`}
-                                className="subjectsCardLink"
-                                style={{
-                                    animationDelay: `${index * 0.1}s`
-                                }}
-                            >
+              </TouchableOpacity>
+            ))
+          }
 
-                                <div className="subjectsCard">
+        </View>
 
-                                    <div className="subjectsCardTop">
+      </View>
 
-                                        <h2 className="subjectsName">
-                                            {subject}
-                                        </h2>
-
-                                        <span className="subjectsFileCount">
-                                            {subjects[subject].length} Files
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </Link>
-                        ))
-                    }
-
-                </div>
-
-            </div>
-
-        </div>
-    );
+    </ScrollView>
+  );
 }
 
-export default SharedSubjectsPage;
+const styles = StyleSheet.create({
+
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+
+  inner: {
+    padding: 20,
+  },
+
+  semesterTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+
+  grid: {
+    gap: 15,
+  },
+
+  card: {
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#f5f5f5',
+  },
+
+  cardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  subjectName: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+
+  fileCount: {
+    fontSize: 14,
+    color: 'gray',
+  },
+
+});
