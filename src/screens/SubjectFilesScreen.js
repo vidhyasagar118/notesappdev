@@ -22,7 +22,9 @@ export default function SubjectFilesScreen({ route }) {
   const loadFiles = async () => {
     try {
       const res = await API.get('/files/myfiles');
-      setFiles(res.data[semester][subject]);
+      setFiles(
+  res.data?.[semester]?.[subject] || []
+);
     } catch (err) {
       console.log(err);
     }

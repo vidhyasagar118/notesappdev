@@ -31,6 +31,9 @@ export default function LoginScreen({ navigation }) {
     } catch (err) {
 
       console.log(err.response?.data || err.message);
+  console.log("MESSAGE:", err.message);
+  console.log("STATUS:", err.response?.status);
+  console.log("DATA:", err.response?.data);
 
       Alert.alert(
         'Error',

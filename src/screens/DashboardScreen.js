@@ -8,10 +8,8 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-
-import * as DocumentPicker from 'expo-document-picker'; // 🔥 IMPORTANT
+import { pick } from '@react-native-documents/picker';
 import API from '../config/api';
-
 export default function DashboardScreen({ navigation }) {
 
   const [semester, setSemester] = useState('');
@@ -35,16 +33,20 @@ export default function DashboardScreen({ navigation }) {
     loadFiles();
   }, []);
 
-  // PICK FILES (same as input type="file")
   const pickFiles = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      multiple: true,
+
+  try {
+
+    const results = await pick({
+      allowMultiSelection: true,
     });
 
-    if (!result.canceled) {
-      setFilesToUpload(result.assets);
-    }
-  };
+    setFilesToUpload(results);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   // UPLOAD FILE
   const uploadFile = async () => {
@@ -199,7 +201,7 @@ export default function DashboardScreen({ navigation }) {
                 onPress={() =>
                   navigation.navigate('SharedSubjects', {
                     semester: sem,
-                    code: groupCode,
+groupCode: groupCode
                   })
                 }
               >
